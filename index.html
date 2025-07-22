@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tabla Cycle Alignment Study</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #4a5568;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #2d3748;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            color: #4a5568;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+        
+        .slider {
+            width: 80%;
+            height: 8px;
+            background: linear-gradient(to right, #e2e8f0, #cbd5e0);
+            border-radius: 4px;
+            outline: none;
+            margin: 25px 0;
+            cursor: pointer;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(102, 126, 234, 0.4);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .phase-display {
+            font-size: 2.2em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+        
+        .btn:hover {
+            background: linear-gradient(45deg, #38a169, #2f855a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+        
+        .submit-btn {
+            background: linear-gradient(45deg, #e53e3e, #c53030);
+            font-size: 1.2em;
+            padding: 15px 35px;
+            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(45deg, #c53030, #9c2626);
+            box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
+        }
+        
+        .trial-info {
+            background: linear-gradient(135deg, #edf2f7, #e2e8f0);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+            text-align: left;
+        }
+        
+        .trial-info h2, .trial-info h3 {
+            margin-top: 0;
+        }
+        
+        .status {
+            background: rgba(45, 55, 72, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .success { 
+            color: #38a169;
+            font-weight: 600;
+        }
+        
+        .warning { 
+            color: #d69e2e;
+            font-weight: 600;
+        }
+        
+        .error { 
+            color: #e53e3e;
+            font-weight: 600;
+        }
+        
+        input[type="text"] {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin: 8px;
+            font-size: 1em;
+            width: 200px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .control-panel {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #ebf8ff, #bee3f8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #3182ce;
+        }
+        
+        .progress-info {
+            background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        
+        .participant-id {
+            background: linear-gradient(135deg, #fffaf0, #feebc8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            font-family: monospace;
+            font-weight: bold;
+            color: #744210;
+            margin: 10px 0;
+        }
+        
+        .tabla-info {
+            background: linear-gradient(135deg, #fef5e7, #fed7aa);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tabla Cycle Alignment Study</h1>
+        <p class="subtitle">Rupak Rhythm Perception Research</p>
+        
+        <div id="status" class="status">
+            <span id="status-text">Ready to begin the tabla rhythm experiment</span>
+        </div>
+        
+        <button id="start-btn" class="btn submit-btn" onclick="startExperiment()">Start Experiment</button>
+        
+        <div id="experiment-content" style="display: none;">
+            <!-- Experiment content will load here -->
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // GOOGLE FORMS CONFIGURATION
+        // ==========================================
+        
+        const GOOGLE_FORMS_CONFIG = {
+            form_url: 'https://docs.google.com/forms/d/e/1FAIpQLSe_FwttiN7E5Ma-8PWgjhbXGww96pp20rOQJdjvZHOw3mLQkw/formResponse',
+            fields: {
+                participant_id: 'entry.1163885589',
+                trial_data: 'entry.112861185',
+                age: 'entry.271345687'
+            }
+        };
+        
+        // Generate unique participant ID
+        const PARTICIPANT_ID = 'TABLA_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        
+        // ==========================================
+        // AUDIO SYSTEM FOR TABLA RHYTHMS
+        // ==========================================
+        
+        let audioContext;
+        let currentBuffers = { stm1: null, stm2: null };
+        let gainNode1, gainNode2, delayNode;
+        let source1, source2;
+        let currentPhase = 0;
+        let experimentData = [];
+        let audioLoaded = false;
+        
+        async function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                gainNode1 = audioContext.createGain();
+                gainNode2 = audioContext.createGain();
+                delayNode = audioContext.createDelay(1.0);
+                
+                gainNode1.connect(audioContext.destination);
+                gainNode2.connect(delayNode);
+                delayNode.connect(audioContext.destination);
+                
+                gainNode1.gain.value = 0.5; // Tabla can be loud
+                gainNode2.gain.value = 0.5;
+                delayNode.delayTime.value = 0;
+                
+                console.log('Audio system initialized for tabla');
+                return true;
+            } catch (error) {
+                console.error('Audio initialization failed:', error);
+                return false;
+            }
+        }
+        
+        // Load audio files
+        async function loadTablaAudio() {
+            try {
+                document.getElementById('status-text').innerHTML = 
+                    '<span class="warning">Loading Rupak_Stm1_4.mp3...</span>';
+                
+                console.log('Attempting to load: audio/Rupak_Stm1_4.mp3');
+                const stm1Buffer = await loadAudioBuffer('audio/Rupak_Stm1_4.mp3');
+                
+                document.getElementById('status-text').innerHTML = 
+                    '<span class="warning">Loading Rupak_Stm2_4.mp3...</span>';
+                
+                console.log('Attempting to load: audio/Rupak_Stm2_4.mp3');
+                const stm2Buffer = await loadAudioBuffer('audio/Rupak_Stm2_4.mp3');
+                
+                currentBuffers = { stm1: stm1Buffer, stm2: stm2Buffer };
+                audioLoaded = true;
+                
+                document.getElementById('status-text').innerHTML = 
+                    '<span class="success">Your MP3 files loaded successfully!</span>';
+                
+                console.log('✅ Both Rupak MP3 files loaded successfully');
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Failed to load your MP3 files:', error);
+                
+                document.getElementById('status-text').innerHTML = 
+                    '<span class="error">⚠️ Could not find your MP3 files. Using test tones instead.</span>';
+                
+                // Show detailed error
+                alert(`Audio loading failed: ${error.message}\n\nPlease check:\n1. Files are in 'audio/' folder\n2. File names match exactly:\n   - Rupak_Stm1_4.mp3\n   - Rupak_Stm2_4.mp3\n3. You're running from a web server (not file://)`);
+                
+                // Generate backup test tones
+                console.log('Generating backup test tones...');
+                currentBuffers = {
+                    stm1: generateTestTone(300, 4), // 4-second test tone
+                    stm2: generateTestTone(400, 4)
+                };
+                audioLoaded = true;
+                return true;
+            }
+        }
+        
+        async function loadAudioBuffer(url) {
+            console.log(`Fetching: ${url}`);
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`File not found: ${url} (Status: ${response.status})`);
+            }
+            
+            console.log(`✅ File found: ${url}`);
+            const arrayBuffer = await response.arrayBuffer();
+            console.log(`✅ File loaded, size: ${arrayBuffer.byteLength} bytes`);
+            
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            console.log(`✅ Audio decoded: ${audioBuffer.duration.toFixed(2)} seconds`);
+            
+            return audioBuffer;
+        }
+        
+        // Backup test tone generator
+        function generateTestTone(frequency, duration) {
+            const sampleRate = audioContext.sampleRate;
+            const buffer = audioContext.createBuffer(1, sampleRate * duration, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < data.length; i++) {
+                const t = i / sampleRate;
+                const fade = t < 0.1 ? t / 0.1 : t > duration - 0.1 ? (duration - t) / 0.1 : 1;
+                data[i] = Math.sin(2 * Math.PI * frequency * t) * fade * 0.3;
+            }
+            return buffer;
+        }
+        
+        function setPhase(degrees) {
+            currentPhase = degrees;
+            // Convert phase to time delay (adjust this based on your tabla cycle length)
+            const maxDelay = 0.5; // Maximum 500ms delay
+            const delayTime = (Math.abs(degrees) / 180) * maxDelay;
+            if (delayNode) {
+                delayNode.delayTime.value = delayTime;
+            }
+        }
+        
+        async function playBoth() {
+            if (!currentBuffers.stm1 || !currentBuffers.stm2 || !audioLoaded) {
+                console.warn('Audio not ready');
+                return false;
+            }
+            
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            
+            stopAudio();
+            
+            source1 = audioContext.createBufferSource();
+            source2 = audioContext.createBufferSource();
+            
+            source1.buffer = currentBuffers.stm1;
+            source2.buffer = currentBuffers.stm2;
+            
+            source1.connect(gainNode1);
+            source2.connect(gainNode2);
+            
+            source1.start();
+            source2.start();
+            
+            console.log('Playing both Rupak stimuli');
+            return true;
+        }
+        
+        async function playSingle(stimType) {
+            const buffer = stimType === 'stm1' ? currentBuffers.stm1 : currentBuffers.stm2;
+            const gainNode = stimType === 'stm1' ? gainNode1 : gainNode2;
+            
+            if (!buffer || !audioLoaded) return false;
+            
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            
+            stopAudio();
+            
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(gainNode);
+            source.start();
+            
+            if (stimType === 'stm1') source1 = source;
+            else source2 = source;
+            
+            console.log(`Playing ${stimType}`);
+            return true;
+        }
+        
+        function stopAudio() {
+            if (source1) { try { source1.stop(); } catch(e) {} source1 = null; }
+            if (source2) { try { source2.stop(); } catch(e) {} source2 = null; }
+        }
+        
+        // ==========================================
+        // EXPERIMENT LOGIC
+        // ==========================================
+        
+        let trialStartTime = 0;
+        let adjustmentCount = 0;
+        let initialPhase = 0;
+        
+        async function startExperiment() {
+            document.getElementById('status-text').innerHTML = 
+                '<span class="warning">Initializing audio system...</span>';
+            
+            const audioReady = await initAudio();
+            if (!audioReady) {
+                document.getElementById('status-text').innerHTML = 
+                    '<span class="error">Audio initialization failed</span>';
+                return;
+            }
+            
+            document.getElementById('status-text').innerHTML = 
+                '<span class="warning">Loading tabla rhythm files...</span>';
+            
+            const audioLoadSuccess = await loadTablaAudio();
+            if (!audioLoadSuccess) {
+                document.getElementById('status-text').innerHTML = 
+                    '<span class="error">Failed to load audio files</span>';
+                return;
+            }
+            
+            document.getElementById('status-text').innerHTML = 
+                '<span class="success">Audio system ready!</span>';
+            
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('experiment-content').style.display = 'block';
+            
+            showParticipantInfo();
+        }
+        
+        function showParticipantInfo() {
+            document.getElementById('experiment-content').innerHTML = `
+                <div class="trial-info">
+                    <h2>Participant Information</h2>
+                    <div class="participant-id">ID: ${PARTICIPANT_ID}</div>
+                    <div class="info-box">
+                        <p><strong>Task:</strong> You will listen to audio rhythms and align their timing.</p>
+                        <p><strong>Instructions:</strong></p>
+                        <ul style="text-align: left; max-width: 500px; margin: 0 auto;">
+                            <li>You'll hear two audio tracks</li>
+                            <li>Use the slider to adjust the timing of the second track</li>
+                            <li>Align them so they sound synchronized</li>
+                            <li>Listen carefully for rhythmic alignment</li>
+                        </ul>
+                        <p>Please provide your age if comfortable (optional):</p>
+                        <div style="text-align: center;">
+                            <label>Age: <input type="text" id="age" placeholder="Enter age (optional)"></label>
+                        </div>
+                    </div>
+                    <button class="btn submit-btn" onclick="startTrial()">Begin Audio Trial</button>
+                </div>
+            `;
+        }
+        
+        function startTrial() {
+            trialStartTime = Date.now();
+            adjustmentCount = 0;
+            initialPhase = Math.floor(Math.random() * 360) - 180;
+            currentPhase = initialPhase;
+            setPhase(initialPhase);
+            
+            document.getElementById('experiment-content').innerHTML = `
+                <div class="trial-info">
+                    <h2>Audio Rhythm Alignment</h2>
+                    <div class="progress-info">
+                        Single Trial - Audio Synchronization Task
+                    </div>
+                    <div class="participant-id">Participant: ${PARTICIPANT_ID}</div>
+                </div>
+                
+                <div class="tabla-info">
+                    <h3>Audio Alignment Task</h3>
+                    <p><strong>Instructions:</strong> Listen to both audio tracks and adjust their timing</p>
+                    <p><strong>Your Task:</strong> Align the rhythmic cycles so they sound synchronized</p>
+                </div>
+                
+                <div class="control-panel">
+                    <h3>Audio Alignment Control</h3>
+                    <p>Adjust the slider to align the timing of both audio tracks</p>
+                    
+                    <input type="range" id="phase-slider" class="slider" 
+                           min="-180" max="180" step="1" value="${initialPhase}">
+                    <div id="phase-display" class="phase-display">${initialPhase}°</div>
+                    
+                    <div class="button-group">
+                        <button class="btn" onclick="playBoth()">Play Both Sounds</button>
+                        <button class="btn" onclick="playSingle('stm1')">Sound 1 Only</button>
+                        <button class="btn" onclick="playSingle('stm2')">Sound 2 Only</button>
+                        <button class="btn" onclick="stopAudio()">Stop Audio</button>
+                    </div>
+                    
+                    <div class="info-box">
+                        <strong>Adjustments Made:</strong> <span id="adjustment-count">0</span><br>
+                        <strong>Goal:</strong> Make both sounds align rhythmically
+                    </div>
+                    
+                    <button class="btn submit-btn" onclick="submitTrial()">Submit Alignment</button>
+                </div>
+                
+                <div class="status">
+                    <span id="trial-status" class="success">Rupak rhythms loaded - you may begin alignment</span>
+                </div>
+            `;
+            
+            // Add slider listener
+            document.getElementById('phase-slider').addEventListener('input', function(e) {
+                const phase = parseInt(e.target.value);
+                setPhase(phase);
+                document.getElementById('phase-display').textContent = phase + '°';
+                adjustmentCount++;
+                document.getElementById('adjustment-count').textContent = adjustmentCount;
+                
+                document.getElementById('trial-status').innerHTML = 
+                    `<span class="success">Cycle alignment adjusted to ${phase}° (${adjustmentCount} total adjustments)</span>`;
+            });
+        }
+        
+        function submitTrial() {
+            stopAudio();
+            
+            const trialDurationMs = Date.now() - trialStartTime;
+            const trialDurationSec = Math.round(trialDurationMs / 1000 * 10) / 10;
+            
+            const trialData = {
+                participant_id: PARTICIPANT_ID,
+                trial_number: 1,
+                trial_name: 'Audio Rhythm Alignment',
+                rhythm_type: 'Rupak',
+                rhythm_beats: 7,
+                stimulus_1: 'Rupak_Stm1_4.mp3',
+                stimulus_2: 'Rupak_Stm2_4.mp3',
+                initial_phase: initialPhase,
+                final_phase: currentPhase,
+                phase_adjustment: currentPhase - initialPhase,
+                adjustments: adjustmentCount,
+                trial_duration_ms: trialDurationMs,
+                trial_duration_sec: trialDurationSec,
+                timestamp: new Date().toISOString()
+            };
+            
+            experimentData.push(trialData);
+            console.log('Rupak trial completed:', trialData);
+            
+            // Show completion message
+            document.getElementById('trial-status').innerHTML = 
+                `<span class="success">Trial completed in ${trialDurationSec} seconds with ${adjustmentCount} adjustments</span>`;
+            
+            setTimeout(() => finishExperiment(), 2000);
+        }
+        
+        async function finishExperiment() {
+            document.getElementById('experiment-content').innerHTML = `
+                <div class="trial-info">
+                    <h2>Experiment Complete!</h2>
+                    <div class="progress-info">
+                        Thank you for participating in our tabla rhythm study
+                    </div>
+                    <div class="info-box">
+                        <p>Submitting your Rupak alignment data...</p>
+                    </div>
+                    <div id="submission-status" class="status">
+                        <span class="warning">Submitting data, please wait...</span>
+                    </div>
+                </div>
+            `;
+            
+            // Prepare data for Google Forms
+            const age = document.getElementById('age')?.value || 'Not provided';
+            const csvData = convertToCSV(experimentData);
+            
+            try {
+                await submitToGoogleForms({
+                    participant_id: PARTICIPANT_ID,
+                    age: age,
+                    data: csvData
+                });
+                
+                document.getElementById('submission-status').innerHTML = 
+                    '<span class="success">Data successfully submitted!</span>';
+                
+                // Show completion
+                document.getElementById('experiment-content').innerHTML += `
+                    <div class="trial-info" style="margin-top: 20px;">
+                        <h3>Thank You!</h3>
+                        <div class="info-box">
+                            <p>Your tabla rhythm alignment data has been successfully recorded.</p>
+                            <div class="participant-id">Participant ID: ${PARTICIPANT_ID}</div>
+                            <div class="progress-info" style="margin: 15px 0;">
+                                <strong>Your Results:</strong><br>
+                                Time Taken: ${experimentData[0].trial_duration_sec} seconds<br>
+                                Adjustments: ${experimentData[0].adjustments}<br>
+                                Final Alignment: ${experimentData[0].final_phase}°
+                            </div>
+                            <p>You may now close this window.</p>
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Submission failed:', error);
+                document.getElementById('submission-status').innerHTML = 
+                    '<span class="error">Submission failed. Downloading backup file...</span>';
+                downloadBackup(csvData);
+            }
+        }
+        
+        async function submitToGoogleForms(data) {
+            const formData = new FormData();
+            formData.append(GOOGLE_FORMS_CONFIG.fields.participant_id, data.participant_id);
+            formData.append(GOOGLE_FORMS_CONFIG.fields.trial_data, data.data);
+            
+            if (data.age && data.age.trim() !== '') {
+                formData.append(GOOGLE_FORMS_CONFIG.fields.age, data.age);
+            }
+            
+            const response = await fetch(GOOGLE_FORMS_CONFIG.form_url, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            });
+            
+            console.log('Tabla rhythm data submitted to Google Form!');
+        }
+        
+        function convertToCSV(data) {
+            if (data.length === 0) return '';
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(row => Object.values(row).join(','));
+            return headers + '\n' + rows.join('\n');
+        }
+        
+        function downloadBackup(csvData) {
+            const blob = new Blob([csvData], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${PARTICIPANT_ID}_tabla_mp3_backup.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Make functions global for onclick handlers
+        window.startExperiment = startExperiment;
+        window.startTrial = startTrial;
+        window.playBoth = playBoth;
+        window.playSingle = playSingle;
+        window.stopAudio = stopAudio;
+        window.submitTrial = submitTrial;
+    </script>
+</body>
+</html>
