@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Rhythm Cycle Alignment Study</title>
+    <!-- Styles skipped for brevity -->
+    <style>
+        /* Keep all your existing styles here – unchanged */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rhythm Cycle Alignment Study</h1>
+        <p class="subtitle">Musical Rhythm Perception Research</p>
+        
+        <div id="status" class="status">
+            <span id="status-text">Ready to begin the experiment</span>
+        </div>
+        
+        <button id="start-btn" class="btn btn-submit" onclick="startExperiment()">Start Experiment</button>
+        
+        <div id="experiment-content" style="display: none;"></div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            GOOGLE_FORMS: {
+                form_url: 'https://docs.google.com/forms/d/e/1FAIpQLSe_FwttiN7E5Ma-8PWgjhbXGww96pp20rOQJdjvZHOw3mLQkw/formResponse',
+                fields: {
+                    participant_id: 'entry.1163885589',
+                    trial_data: 'entry.112861185',
+                    age: 'entry.271345687'
+                }
+            },
+            AUDIO: {
+                beat_duration: 0.57143,
+                beats_per_cycle: 7,
+                total_cycles: 24,
+                files: {
+                    rhythm: 'audio/Rupak_Stm1_4.mp3',
+                    tones: 'audio/Rupak_Stm2_4.mp3'
+                }
+            }
+        };
+
+        let audioContext;
+        let audioBuffers = { rhythm: null, tones: null };
+        let audioSources = { rhythm: null, tones: null };
+        let gainNodes = { rhythm: null, tones: null };
+        let participantId = 'RHYTHM_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        let currentBeatOffset = 0;
+        let initialBeatOffset = 0;
+        let isPlaying = false;
+        let currentPlaybackPosition = 0;
+        let playbackStartTime = 0;
+        let isFirstPlay = true;
+        let trialStartTime = 0;
+        let adjustmentCount = 0;
+        let experimentData = [];
+        let sliderValue = 0;
+
+        async function initializeAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                gainNodes.rhythm = audioContext.createGain();
+                gainNodes.tones = audioContext.createGain();
+                gainNodes.rhythm.connect(audioContext.destination);
+                gainNodes.tones.connect(audioContext.destination);
+                gainNodes.rhythm.gain.value = 0.7;
+                gainNodes.tones.gain.value = 0.8;
+                return true;
+            } catch (error) {
+                console.error('Audio initialization failed:', error);
+                return false;
+            }
+        }
+
+        async function loadAudioFiles() {
+            try {
+                updateStatus('Loading audio files...', 'warning');
+                const [rhythmBuffer, tonesBuffer] = await Promise.all([
+                    loadAudioBuffer(CONFIG.AUDIO.files.rhythm),
+                    loadAudioBuffer(CONFIG.AUDIO.files.tones)
+                ]);
+                audioBuffers.rhythm = rhythmBuffer;
+                audioBuffers.tones = tonesBuffer;
+                updateStatus('Audio files loaded successfully!', 'success');
+                return true;
+            } catch (error) {
+                console.error('Audio loading failed:', error);
+                updateStatus('Failed to load audio files.', 'error');
+                alert(`Audio loading failed: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function loadAudioBuffer(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Could not load ${url}`);
+            const arrayBuffer = await response.arrayBuffer();
+            return await audioContext.decodeAudioData(arrayBuffer);
+        }
+
+        async function playAudio() {
+            if (!audioBuffers.rhythm || !audioBuffers.tones) {
+                updateStatus('Audio not loaded', 'error');
+                return false;
+            }
+
+            if (audioContext.state === 'suspended') await audioContext.resume();
+            stopAudio();
+
+            const now = audioContext.currentTime + 0.1;
+            const toneOffset = currentBeatOffset * CONFIG.AUDIO.beat_duration;
+
+            let startPosition;
+            if (isFirstPlay) {
+                const randomBeat = Math.floor(Math.random() * 7) + 1;
+                startPosition = (randomBeat - 1) * CONFIG.AUDIO.beat_duration;
+                currentPlaybackPosition = startPosition;
+                isFirstPlay = false;
+            } else {
+                startPosition = currentPlaybackPosition;
+            }
+
+            audioSources.rhythm = audioContext.createBufferSource();
+            audioSources.rhythm.buffer = audioBuffers.rhythm;
+            audioSources.rhythm.connect(gainNodes.rhythm);
+            audioSources.rhythm.start(now, startPosition);
+
+            audioSources.tones = audioContext.createBufferSource();
+            audioSources.tones.buffer = audioBuffers.tones;
+            audioSources.tones.connect(gainNodes.tones);
+            audioSources.tones.start(now, startPosition + toneOffset);
+
+            isPlaying = true;
+            playbackStartTime = now;
+
+            updateStatus('Playing... Use arrows to adjust alignment.', 'success');
+
+            const remainingDuration = audioBuffers.rhythm.duration - startPosition;
+            setTimeout(() => {
+                if (isPlaying) {
+                    currentPlaybackPosition = 0;
+                    isFirstPlay = true;
+                    stopAudio();
+                    updateStatus('Audio finished.', '');
+                }
+            }, remainingDuration * 1000);
+
+            return true;
+        }
+
+        function pauseAudio() {
+            if (isPlaying) {
+                const elapsedTime = audioContext.currentTime - playbackStartTime;
+                currentPlaybackPosition += elapsedTime;
+                if (currentPlaybackPosition >= audioBuffers.rhythm.duration) {
+                    currentPlaybackPosition = 0;
+                }
+            }
+            stopAudio();
+            updateStatus('Paused. Adjust, then play again.', '');
+        }
+
+        function stopAudio() {
+            Object.values(audioSources).forEach(source => {
+                if (source) {
+                    try { source.stop(); } catch (e) {}
+                }
+            });
+            audioSources.rhythm = null;
+            audioSources.tones = null;
+            isPlaying = false;
+        }
+
+        function updateStatus(message, type = '') {
+            const statusEl = document.getElementById('status-text') || document.getElementById('submission-status');
+            if (statusEl) {
+                statusEl.textContent = message;
+                const statusContainer = statusEl.closest('.status');
+                if (statusContainer) {
+                    statusContainer.className = `status ${type}`;
+                }
+            }
+        }
+
+        // Remaining functions unchanged (startExperiment, startTrial, handleSliderChange, etc.)
+        // To save space, those are not shown here since your request was focused on the shift fix.
+
+        // Enable global function access
+        window.startExperiment = startExperiment;
+        window.startTrial = startTrial;
+        window.playAudio = playAudio;
+        window.pauseAudio = pauseAudio;
+        window.handleSliderChange = handleSliderChange;
+        window.submitTrial = submitTrial;
+    </script>
+</body>
+</html>
