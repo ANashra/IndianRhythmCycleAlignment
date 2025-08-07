@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhythm Cycle Alignment Study</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .participant-id {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-align: center;
+            font-family: monospace;
+            font-weight: bold;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+
+        /* Slider Styles */
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 15px;
+        }
+
+        .slider-label {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+
+        .slider-track {
+            position: relative;
+            width: 350px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .slider-input {
+            width: 350px;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+        }
+
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .slider-input::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+        }
+
+        .slider-input::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .slider-ticks {
+            position: relative;
+            width: 350px;
+            height: 20px;
+            margin-top: 5px;
+        }
+
+        .slider-tick {
+            position: absolute;
+            width: 2px;
+            height: 12px;
+            background: #a0aec0;
+            top: 4px;
+        }
+
+        .slider-tick.center {
+            background: #4299e1;
+            width: 3px;
+            height: 16px;
+            top: 2px;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 350px;
+            font-size: 0.9em;
+            color: #718096;
+            margin-top: 8px;
+        }
+
+        .shift-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 10px;
+            min-height: 1.5em;
+        }
+
+        .status {
+            background: rgba(66, 153, 225, 0.1);
+            border: 1px solid #4299e1;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status.success { 
+            background: rgba(72, 187, 120, 0.1); 
+            border-color: #48bb78; 
+            color: #2f855a; 
+        }
+
+        .status.warning { 
+            background: rgba(237, 137, 54, 0.1); 
+            border-color: #ed8936; 
+            color: #c05621; 
+        }
+
+        .status.error { 
+            background: rgba(229, 62, 62, 0.1); 
+            border-color: #e53e3e; 
+            color: #c53030; 
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(66, 153, 225, 0.4);
+        }
+
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-submit {
+            background: linear-gradient(45deg, #e53e3e, #c53030);
+            font-size: 1.3em;
+            padding: 18px 40px;
+            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+        }
+
+        .btn-submit:hover {
+            box-shadow: 0 8px 25px rgba(229, 62, 62, 0.4);
+        }
+
+        .control-panel {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .beat-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .beat-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .beat-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .beat-btn:active {
+            transform: scale(0.95);
+        }
+
+        .beat-display {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .beat-number {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #ebf8ff, #bee3f8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #3182ce;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #4299e1;
+        }
+
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .instructions ul {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin: 8px;
+            font-size: 1em;
+            width: 200px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            height: 6px;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .beat-controls {
+                gap: 20px;
+            }
+            
+            .beat-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rhythm Cycle Alignment Study</h1>
+        <p class="subtitle">Musical Rhythm Perception Research</p>
+        
+        <div id="status" class="status">
+            <span id="status-text">Ready to begin the experiment</span>
+        </div>
+        
+        <button id="start-btn" class="btn btn-submit" onclick="startExperiment()">Start Experiment</button>
+        
+        <div id="experiment-content" style="display: none;">
+            <!-- Experiment content will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION
+        // ==========================================
+        
+        const CONFIG = {
+            GOOGLE_FORMS: {
+                form_url: 'https://docs.google.com/forms/d/e/1FAIpQLSe_FwttiN7E5Ma-8PWgjhbXGww96pp20rOQJdjvZHOw3mLQkw/formResponse',
+                fields: {
+                    participant_id: 'entry.1163885589',
+                    trial_data: 'entry.112861185',
+                    age: 'entry.271345687'
+                }
+            },
+            AUDIO: {
+                beat_duration: 0.57143, // 571.43 milliseconds
+                beats_per_cycle: 7,
+                total_cycles: 24,
+                files: {
+                    rhythm: 'audio/Rupak_Stm1_4.mp3',
+                    tones: 'audio/Rupak_Stm2_4.mp3'
+                }
+            }
+        };
+        
+        // ==========================================
+        // GLOBAL VARIABLES
+        // ==========================================
+        
+        let audioContext;
+        let audioBuffers = { rhythm: null, tones: null };
+        let audioSources = { rhythm: null, tones: null };
+        let gainNodes = { rhythm: null, tones: null };
+        
+        let participantId = 'RHYTHM_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        let currentBeatOffset = 0; // Beat offset for tone alignment
+        let initialBeatOffset = 0; // Starting misalignment
+        let isPlaying = false;
+        let currentPlaybackPosition = 0; // Track where we are in the audio
+        let playbackStartTime = 0; // When playback started
+        let isFirstPlay = true; // Track if this is the first play of the trial
+        let trialStartTime = 0;
+        let adjustmentCount = 0;
+        let experimentData = [];
+        let sliderValue = 0; // Track slider position (-7 to +7)
+        
+        // ==========================================
+        // AUDIO FUNCTIONS
+        // ==========================================
+        
+        async function initializeAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create gain nodes for volume control
+                gainNodes.rhythm = audioContext.createGain();
+                gainNodes.tones = audioContext.createGain();
+                
+                gainNodes.rhythm.connect(audioContext.destination);
+                gainNodes.tones.connect(audioContext.destination);
+                
+                // Set initial volumes
+                gainNodes.rhythm.gain.value = 0.7;
+                gainNodes.tones.gain.value = 0.8;
+                
+                return true;
+            } catch (error) {
+                console.error('Audio initialization failed:', error);
+                return false;
+            }
+        }
+        
+        async function loadAudioFiles() {
+            try {
+                updateStatus('Loading audio files...', 'warning');
+                
+                const [rhythmBuffer, tonesBuffer] = await Promise.all([
+                    loadAudioBuffer(CONFIG.AUDIO.files.rhythm),
+                    loadAudioBuffer(CONFIG.AUDIO.files.tones)
+                ]);
+                
+                audioBuffers.rhythm = rhythmBuffer;
+                audioBuffers.tones = tonesBuffer;
+                
+                updateStatus('Audio files loaded successfully!', 'success');
+                return true;
+                
+            } catch (error) {
+                console.error('Audio loading failed:', error);
+                updateStatus('Failed to load audio files. Please check file paths.', 'error');
+                
+                alert(`Audio loading failed: ${error.message}\n\nPlease ensure:\n1. Audio files are in the 'audio/' folder\n2. File names are correct\n3. You're running from a web server`);
+                return false;
+            }
+        }
+        
+        async function loadAudioBuffer(url) {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Could not load ${url}`);
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            return await audioContext.decodeAudioData(arrayBuffer);
+        }
+        
+        async function playAudio() {
+            if (!audioBuffers.rhythm || !audioBuffers.tones) {
+                updateStatus('Audio not loaded', 'error');
+                return false;
+            }
+            
+            // Resume audio context if suspended
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            
+            // Stop any currently playing audio
+            stopAudio();
+            
+            const now = audioContext.currentTime + 0.1; // Small delay for smooth start
+            const toneOffset = currentBeatOffset * CONFIG.AUDIO.beat_duration;
+            
+            // Determine starting position
+            let startPosition;
+            if (isFirstPlay) {
+                // Random starting beat (1-7) on first play
+                const randomBeat = Math.floor(Math.random() * 7) + 1; // 1 to 7
+                startPosition = (randomBeat - 1) * CONFIG.AUDIO.beat_duration;
+                currentPlaybackPosition = startPosition;
+                isFirstPlay = false;
+            } else {
+                // Use current playback position for pause/resume
+                startPosition = currentPlaybackPosition;
+            }
+            
+            // Play rhythm track from start position
+            audioSources.rhythm = audioContext.createBufferSource();
+            audioSources.rhythm.buffer = audioBuffers.rhythm;
+            audioSources.rhythm.connect(gainNodes.rhythm);
+            audioSources.rhythm.start(now, startPosition);
+            
+            // Play tones track with offset from start position
+            audioSources.tones = audioContext.createBufferSource();
+            audioSources.tones.buffer = audioBuffers.tones;
+            audioSources.tones.connect(gainNodes.tones);
+            audioSources.tones.start(now, startPosition + toneOffset);
+            
+            isPlaying = true;
+            playbackStartTime = now;
+            
+            updateStatus('Playing... Use arrows to adjust alignment in real-time', 'success');
+            
+            // Auto-stop after buffer duration
+            const remainingDuration = audioBuffers.rhythm.duration - startPosition;
+            setTimeout(() => {
+                if (isPlaying) {
+                    // Reset for replay when audio finishes
+                    currentPlaybackPosition = 0;
+                    isFirstPlay = true;
+                    stopAudio();
+                    updateStatus('Audio finished. Click Play to listen again from the beginning.', '');
+                }
+            }, remainingDuration * 1000);
+            
+            return true;
+        }
+        
+        function pauseAudio() {
+            if (isPlaying) {
+                // Calculate current playback position
+                const elapsedTime = audioContext.currentTime - playbackStartTime;
+                currentPlaybackPosition += elapsedTime;
+                
+                // Ensure we don't go beyond the audio duration
+                if (currentPlaybackPosition >= audioBuffers.rhythm.duration) {
+                    currentPlaybackPosition = 0; // Reset if we've reached the end
+                }
+            }
+            
+            stopAudio();
+            updateStatus('Paused. Use arrows to adjust, then Play to resume.', '');
+        }
+        
+        function stopAudio() {
+            Object.values(audioSources).forEach(source => {
+                if (source) {
+                    try { source.stop(); } catch(e) {}
+                }
+            });
+            audioSources.rhythm = null;
+            audioSources.tones = null;
+            isPlaying = false;
+        }
+        
+        // ==========================================
+        // EXPERIMENT FUNCTIONS
+        // ==========================================
+        
+        async function startExperiment() {
+            updateStatus('Initializing audio system...', 'warning');
+            
+            const audioInit = await initializeAudio();
+            if (!audioInit) {
+                updateStatus('Audio initialization failed', 'error');
+                return;
+            }
+            
+            const audioLoaded = await loadAudioFiles();
+            if (!audioLoaded) {
+                return;
+            }
+            
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('experiment-content').style.display = 'block';
+            
+            showInstructions();
+        }
+        
+        function showInstructions() {
+            const content = `
+                <div class="participant-id">Participant ID: ${participantId}</div>
+                
+                <div class="instructions">
+                    <h3>Instructions</h3>
+                    <ul>
+                        <li><strong>Task:</strong> Align the tone beeps with the rhythm track</li>
+                        <li><strong>Audio:</strong> You'll hear 24 cycles of a 7-beat rhythm (~2 minutes)</li>
+                        <li><strong>Controls:</strong> Use the slider to shift the tones earlier or later</li>
+                        <li><strong>Goal:</strong> Find the position where tones align best with the rhythm's first beat</li>
+                        <li><strong>Tip:</strong> You can adjust the slider while audio plays for real-time feedback</li>
+                    </ul>
+                </div>
+                
+                <div class="info-box">
+                    <p><strong>Age (optional):</strong> <input type="number" id="age" placeholder="Enter your age" min="1" max="120"></p>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="startTrial()">Begin Trial</button>
+                </div>
+            `;
+            
+            document.getElementById('experiment-content').innerHTML = content;
+        }
+        
+        function startTrial() {
+            // Set random initial misalignment (1-6 beats off)
+            initialBeatOffset = Math.floor(Math.random() * 6) + 1;  // 1 to 6
+            currentBeatOffset = initialBeatOffset;
+            
+            trialStartTime = Date.now();
+            adjustmentCount = 0;
+            
+            // Reset for new trial
+            currentPlaybackPosition = 0;
+            isFirstPlay = true;
+            sliderValue = 0; // Reset slider to center
+            
+            const content = `
+                <div class="control-panel">
+                    <div class="beat-display">
+                        <div style="color: #718096; font-size: 0.95em; margin-top: 8px;">Use the arrows below to adjust the timing of the tone/beep. You can adjust while audio is playing for immediate feedback.</div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">Timing Adjustment</div>
+                        <div class="slider-track">
+                            <input 
+                                type="range" 
+                                min="-7" 
+                                max="7" 
+                                value="0" 
+                                class="slider-input" 
+                                id="timing-slider"
+                                oninput="handleSliderChange(this.value)"
+                            >
+                        </div>
+                        <div class="slider-ticks">
+                            <div class="slider-tick" style="left: 0px;"></div>
+                            <div class="slider-tick" style="left: 25px;"></div>
+                            <div class="slider-tick" style="left: 50px;"></div>
+                            <div class="slider-tick" style="left: 75px;"></div>
+                            <div class="slider-tick" style="left: 100px;"></div>
+                            <div class="slider-tick" style="left: 125px;"></div>
+                            <div class="slider-tick" style="left: 150px;"></div>
+                            <div class="slider-tick center" style="left: 175px;"></div>
+                            <div class="slider-tick" style="left: 200px;"></div>
+                            <div class="slider-tick" style="left: 225px;"></div>
+                            <div class="slider-tick" style="left: 250px;"></div>
+                            <div class="slider-tick" style="left: 275px;"></div>
+                            <div class="slider-tick" style="left: 300px;"></div>
+                            <div class="slider-tick" style="left: 325px;"></div>
+                            <div class="slider-tick" style="left: 350px;"></div>
+                        </div>
+                        <div class="slider-labels">
+                            <span>Earlier (-7)</span>
+                            <span>Original (0)</span>
+                            <span>Later (+7)</span>
+                        </div>
+                        <div class="shift-display" id="shift-display">No adjustment</div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="playAudio()">▶ Play</button>
+                        <button class="btn" onclick="pauseAudio()">⏸ Pause</button>
+                    </div>
+                    
+                    <div class="info-box">
+                        Use the slider to adjust timing and click Play to hear changes.
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-submit" onclick="submitTrial()">Submit Final Answer</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('experiment-content').innerHTML = content;
+            updateStatus('Ready! Click Play and use arrows to adjust alignment in real-time.', '');
+        }
+        
+        function handleSliderChange(value) {
+            const newSliderValue = parseInt(value);
+            sliderValue = newSliderValue;
+            adjustmentCount++; // Count each slider movement as an adjustment
+            
+            // Calculate beat offset: each slider step = 1 beat shift
+            // Positive slider values shift tones later (to the right)
+            // Negative slider values shift tones earlier (to the left)
+            let newOffset = initialBeatOffset + sliderValue;
+            
+            // Wrap around the beat cycle properly
+            while (newOffset < 0) {
+                newOffset += CONFIG.AUDIO.beats_per_cycle;
+            }
+            while (newOffset >= CONFIG.AUDIO.beats_per_cycle) {
+                newOffset -= CONFIG.AUDIO.beats_per_cycle;
+            }
+            
+            currentBeatOffset = newOffset;
+            
+            // Update display
+            updateShiftDisplay();
+            
+            // If audio is playing, seamlessly restart from current position with new offset
+            if (isPlaying) {
+                // Calculate where we are now
+                const elapsedTime = audioContext.currentTime - playbackStartTime;
+                currentPlaybackPosition += elapsedTime;
+                
+                // Restart audio from current position with new alignment
+                playAudio();
+                updateStatus('Timing adjusted - audio continues with new alignment', 'success');
+            } else {
+                updateStatus('Timing adjusted. Click Play to hear the change.', '');
+            }
+        }
+        
+        function updateShiftDisplay() {
+            const displayEl = document.getElementById('shift-display');
+            if (displayEl) {
+                if (sliderValue === 0) {
+                    displayEl.textContent = 'No adjustment';
+                    displayEl.style.color = '#718096';
+                } else if (sliderValue > 0) {
+                    displayEl.textContent = `Shifted ${sliderValue} position${sliderValue > 1 ? 's' : ''} later`;
+                    displayEl.style.color = '#48bb78';
+                } else {
+                    displayEl.textContent = `Shifted ${Math.abs(sliderValue)} position${Math.abs(sliderValue) > 1 ? 's' : ''} earlier`;
+                    displayEl.style.color = '#e53e3e';
+                }
+            }
+        }
+        
+        function submitTrial() {
+            pauseAudio();
+            
+            const trialDuration = Date.now() - trialStartTime;
+            const age = document.getElementById('age')?.value || '';
+            
+            // Calculate error (assuming beat 1 is correct alignment, so beat offset 0)
+            const correctBeat = 0; // Beat 0 = Beat 1 in display
+            const errorBeats = currentBeatOffset - correctBeat;
+            const absoluteError = Math.abs(errorBeats);
+            
+            const trialData = {
+                participant_id: participantId,
+                timestamp: new Date().toISOString(),
+                age: age,
+                
+                // Trial configuration
+                rhythm_file: CONFIG.AUDIO.files.rhythm,
+                tones_file: CONFIG.AUDIO.files.tones,
+                beat_duration_ms: CONFIG.AUDIO.beat_duration * 1000,
+                beats_per_cycle: CONFIG.AUDIO.beats_per_cycle,
+                total_cycles: CONFIG.AUDIO.total_cycles,
+                
+                // Participant response
+                initial_beat_offset: initialBeatOffset,
+                final_beat_offset: currentBeatOffset,
+                slider_final_position: sliderValue, // How much they shifted from original
+                correct_beat_offset: correctBeat,
+                
+                // Performance metrics
+                error_beats: errorBeats,
+                absolute_error_beats: absoluteError,
+                total_adjustments: adjustmentCount,
+                trial_duration_ms: trialDuration,
+                trial_duration_sec: Math.round(trialDuration / 100) / 10
+            };
+            
+            experimentData.push(trialData);
+            
+            updateStatus('Trial completed! Preparing to submit data...', 'success');
+            setTimeout(() => finishExperiment(trialData), 1500);
+        }
+        
+        async function finishExperiment(data) {
+            const content = `
+                <div class="participant-id">Participant ID: ${participantId}</div>
+                
+                <div class="info-box">
+                    <h3 style="color: #2d3748; margin-bottom: 15px;">Experiment Complete!</h3>
+                    <p>Submitting your data...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress"></div>
+                    </div>
+                </div>
+                
+                <div id="submission-status" class="status warning">
+                    Submitting data...
+                </div>
+            `;
+            
+            document.getElementById('experiment-content').innerHTML = content;
+            
+            // Animate progress bar
+            setTimeout(() => {
+                document.getElementById('progress').style.width = '100%';
+            }, 500);
+            
+            try {
+                const csvData = convertToCSV([data]);
+                await submitToGoogleForms(data, csvData);
+                
+                showResults(data);
+                
+            } catch (error) {
+                console.error('Submission failed:', error);
+                
+                document.getElementById('submission-status').innerHTML = 
+                    '<span class="error">Submission failed. Downloading backup data...</span>';
+                
+                downloadBackup(convertToCSV([data]));
+                showResults(data);
+            }
+        }
+        
+        function showResults(data) {
+            const finalBeat = data.final_beat_offset + 1; // Convert to 1-based display
+            const correctBeat = 1; // Beat 1 is the target
+            const isCorrect = finalBeat === correctBeat;
+            
+            let resultMessage = '';
+            if (isCorrect) {
+                resultMessage = `<span style="color: #38a169; font-weight: bold;">Excellent! You correctly aligned the tones with beat 1!</span>`;
+            } else {
+                resultMessage = `<span style="color: #d69e2e; font-weight: bold;">You aligned the tones with beat ${finalBeat}. The target was beat 1.</span>`;
+            }
+            
+            const content = `
+                <div class="participant-id">Participant ID: ${participantId}</div>
+                
+                <div class="status success">
+                    Data submitted successfully!
+                </div>
+                
+                <div class="info-box">
+                    <h3 style="color: #2d3748; margin-bottom: 15px;">Thank You!</h3>
+                    <p>${resultMessage}</p>
+                    <br>
+                    <p>Your data helps us understand rhythm perception. You may now close this window.</p>
+                </div>
+            `;
+            
+            document.getElementById('experiment-content').innerHTML = content;
+        }
+        
+        // ==========================================
+        // DATA SUBMISSION
+        // ==========================================
+        
+        async function submitToGoogleForms(data, csvData) {
+            const formData = new FormData();
+            formData.append(CONFIG.GOOGLE_FORMS.fields.participant_id, data.participant_id);
+            formData.append(CONFIG.GOOGLE_FORMS.fields.trial_data, csvData);
+            
+            if (data.age && data.age.trim() !== '') {
+                formData.append(CONFIG.GOOGLE_FORMS.fields.age, data.age);
+            }
+            
+            await fetch(CONFIG.GOOGLE_FORMS.form_url, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            });
+        }
+        
+        function convertToCSV(data) {
+            if (data.length === 0) return '';
+            
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(row => 
+                Object.values(row).map(value => 
+                    typeof value === 'string' ? `"${value}"` : value
+                ).join(',')
+            );
+            
+            return headers + '\n' + rows.join('\n');
+        }
+        
+        function downloadBackup(csvData) {
+            const blob = new Blob([csvData], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${participantId}_rhythm_alignment.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // ==========================================
+        // UTILITY FUNCTIONS
+        // ==========================================
+        
+        function updateStatus(message, type = '') {
+            const statusEl = document.getElementById('status-text') || document.getElementById('submission-status');
+            if (statusEl) {
+                statusEl.textContent = message;
+                const statusContainer = statusEl.closest('.status');
+                if (statusContainer) {
+                    statusContainer.className = `status ${type}`;
+                }
+            }
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            if (document.getElementById('timing-slider')) { // Only when in trial
+                if (event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    // Move slider one position earlier (more negative)
+                    const slider = document.getElementById('timing-slider');
+                    if (slider && parseInt(slider.value) > -7) {
+                        slider.value = parseInt(slider.value) - 1;
+                        handleSliderChange(slider.value);
+                    }
+                } else if (event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    // Move slider one position later (more positive)
+                    const slider = document.getElementById('timing-slider');
+                    if (slider && parseInt(slider.value) < 7) {
+                        slider.value = parseInt(slider.value) + 1;
+                        handleSliderChange(slider.value);
+                    }
+                } else if (event.key === ' ') {
+                    event.preventDefault();
+                    if (isPlaying) {
+                        pauseAudio();
+                    } else {
+                        playAudio();
+                    }
+                }
+            }
+        });
+        
+        // Make functions global for onclick handlers
+        window.startExperiment = startExperiment;
+        window.startTrial = startTrial;
+        window.playAudio = playAudio;
+        window.pauseAudio = pauseAudio;
+        window.handleSliderChange = handleSliderChange;
+        window.submitTrial = submitTrial;
+        
+    </script>
+</body>
+</html>
