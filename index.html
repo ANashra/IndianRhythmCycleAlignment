@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhythm Cycle Alignment Study</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .participant-id {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-align: center;
+            font-family: monospace;
+            font-weight: bold;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+
+        .trial-progress {
+            background: linear-gradient(135deg, #4f7942 0%, #2d5016 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0;
+            font-size: 1.1em;
+            box-shadow: 0 4px 15px rgba(79, 121, 66, 0.3);
+        }
+
+        .trial-info {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .rhythm-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .status {
+            background: rgba(66, 153, 225, 0.1);
+            border: 1px solid #4299e1;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status.success { 
+            background: rgba(72, 187, 120, 0.1); 
+            border-color: #48bb78; 
+            color: #2f855a; 
+        }
+
+        .status.warning { 
+            background: rgba(237, 137, 54, 0.1); 
+            border-color: #ed8936; 
+            color: #c05621; 
+        }
+
+        .status.error { 
+            background: rgba(229, 62, 62, 0.1); 
+            border-color: #e53e3e; 
+            color: #c53030; 
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(66, 153, 225, 0.4);
+        }
+
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-submit {
+            background: linear-gradient(45deg, #e53e3e, #c53030);
+            font-size: 1.3em;
+            padding: 18px 40px;
+            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+        }
+
+        .btn-submit:hover {
+            box-shadow: 0 8px 25px rgba(229, 62, 62, 0.4);
+        }
+
+        .btn-next {
+            background: linear-gradient(45deg, #9f7aea, #805ad5);
+            font-size: 1.2em;
+            padding: 16px 35px;
+            box-shadow: 0 4px 15px rgba(159, 122, 234, 0.3);
+        }
+
+        .btn-next:hover {
+            box-shadow: 0 8px 25px rgba(159, 122, 234, 0.4);
+        }
+
+        .control-panel {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .beat-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .beat-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .beat-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .beat-btn:active {
+            transform: scale(0.95);
+        }
+
+        .beat-display {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* Circular Wheel Styles - Visual Only */
+        .wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 15px;
+        }
+
+        .wheel-label {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+
+        .timing-wheel {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            margin: 20px 0;
+            pointer-events: none; /* Make it purely visual */
+        }
+
+        .wheel-base {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            border: 3px solid #e2e8f0;
+            box-shadow: 
+                inset 0 4px 8px rgba(0, 0, 0, 0.1),
+                0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .wheel-tick {
+            position: absolute;
+            width: 3px;
+            height: 20px;
+            background: #a0aec0;
+            border-radius: 1.5px;
+            transform-origin: 50% 100px; /* Center of circle */
+            top: 10px;
+            left: 50%;
+            margin-left: -1.5px;
+        }
+
+        .wheel-tick.start-position {
+            background: #4299e1;
+            width: 4px;
+            height: 25px;
+            margin-left: -2px;
+            top: 7.5px;
+            box-shadow: 0 2px 6px rgba(66, 153, 225, 0.4);
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 25px solid #667eea;
+            top: 10px;
+            left: 50%;
+            transform-origin: 50% 100px; /* Same as tick marks - center of circle */
+            margin-left: -10px;
+            filter: drop-shadow(0 3px 6px rgba(102, 126, 234, 0.4));
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+
+        .wheel-center {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            top: 50%;
+            left: 50%;
+            margin: -10px 0 0 -10px;
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+            z-index: 15;
+        }
+
+        .wheel-labels {
+            text-align: center;
+            font-size: 0.9em;
+            color: #718096;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #ebf8ff, #bee3f8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #3182ce;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #4299e1;
+        }
+
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .instructions ul {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin: 8px;
+            font-size: 1em;
+            width: 200px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            height: 6px;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .experiment-progress {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #e2e8f0;
+        }
+
+        .progress-bar-container {
+            margin: 10px 0;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #4a5568;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .beat-controls {
+                gap: 20px;
+            }
+            
+            .beat-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rhythm Cycle Alignment Study</h1>
+        <p class="subtitle">Musical Rhythm Perception Research</p>
+        
+        <div id="status" class="status">
+            <span id="status-text">Ready to begin the experiment</span>
+        </div>
+        
+        <button id="start-btn" class="btn btn-submit" onclick="startExperiment()">Start Experiment</button>
+        
+        <div id="experiment-content" style="display: none;">
+            <!-- Experiment content will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION
+        // ==========================================
+        
+        const CONFIG = {
+            GOOGLE_FORMS: {
+                form_url: 'https://docs.google.com/forms/d/e/1FAIpQLSe_FwttiN7E5Ma-8PWgjhbXGww96pp20rOQJdjvZHOw3mLQkw/formResponse',
+                fields: {
+                    participant_id: 'entry.1163885589',
+                    trial_data: 'entry.112861185',
+                    age: 'entry.271345687'
+                }
+            },
+            RHYTHMS: [
+                {
+                    name: 'Jhaptal',
+                    stm1: 'audio/Jhaptal_Stm1_5.mp3',
+                    stm2: 'audio/Jhaptal_Stm2_5.mp3',
+                    beats_per_cycle: 10,
+                    beat_duration: 0.500, // 500ms per beat
+                    total_cycles: 24
+                },
+                {
+                    name: 'Keherva',
+                    stm1: 'audio/Keherva_Stm1_5.mp3',
+                    stm2: 'audio/Keherva_Stm2_5.mp3',
+                    beats_per_cycle: 8,
+                    beat_duration: 0.625, // 625ms per beat
+                    total_cycles: 24
+                },
+                {
+                    name: 'Rupak',
+                    stm1: 'audio/Rupak_Stm1_5.mp3',
+                    stm2: 'audio/Rupak_Stm2_5.mp3',
+                    beats_per_cycle: 7,
+                    beat_duration: 0.714286, // 714.286ms per beat (5000ms ÷ 7 beats)
+                    total_cycles: 24
+                },
+                {
+                    name: 'Teental',
+                    stm1: 'audio/Teental_Stm1_5.mp3',
+                    stm2: 'audio/Teental_Stm2_5.mp3',
+                    beats_per_cycle: 16,
+                    beat_duration: 0.3125, // 312.5ms per beat
+                    total_cycles: 24
+                }
+            ],
+            REPETITIONS: 2  // How many times each rhythm is presented
+        };
+        
+        // ==========================================
+        // GLOBAL VARIABLES
+        // ==========================================
+        
+        let audioContext;
+        let audioBuffers = { rhythm: null, tones: null };
+        let audioSources = { rhythm: null, tones: null };
+        let gainNodes = { rhythm: null, tones: null };
+        
+        let participantId = 'RHYTHM_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        
+        // Experiment management
+        let experimentTrials = [];
+        let currentTrialIndex = 0;
+        let currentTrial = null;
+        let participantAge = '';
+        
+        // Trial-specific variables
+        let currentBeatOffset = 0;
+        let initialBeatOffset = 0;
+        let isPlaying = false;
+        let currentPlaybackPosition = 0;
+        let playbackStartTime = 0;
+        let isFirstPlay = true;
+        let trialStartTime = 0;
+        let adjustmentCount = 0;
+        let allTrialData = [];
+        
+        // ==========================================
+        // EXPERIMENT SETUP FUNCTIONS
+        // ==========================================
+        
+        function generateTrials() {
+            let trials = [];
+            
+            // Create trials for each rhythm, repeated according to CONFIG.REPETITIONS
+            for (let rep = 0; rep < CONFIG.REPETITIONS; rep++) {
+                for (let rhythm of CONFIG.RHYTHMS) {
+                    trials.push({
+                        rhythm: rhythm,
+                        repetition: rep + 1,
+                        trial_id: `${rhythm.name}_${rep + 1}`
+                    });
+                }
+            }
+            
+            // Randomize trial order
+            for (let i = trials.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [trials[i], trials[j]] = [trials[j], trials[i]];
+            }
+            
+            // Add sequential trial numbers
+            trials.forEach((trial, index) => {
+                trial.trial_number = index + 1;
+            });
+            
+            return trials;
+        }
+        
+        // ==========================================
+        // AUDIO FUNCTIONS
+        // ==========================================
+        
+        async function initializeAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+                
+                gainNodes.rhythm = audioContext.createGain();
+                gainNodes.tones = audioContext.createGain();
+                
+                gainNodes.rhythm.connect(audioContext.destination);
+                gainNodes.tones.connect(audioContext.destination);
+                
+                gainNodes.rhythm.gain.value = 0.7;
+                gainNodes.tones.gain.value = 0.8;
+                
+                console.log('Audio context state:', audioContext.state);
+                return true;
+            } catch (error) {
+                console.error('Audio initialization failed:', error);
+                return false;
+            }
+        }
+        
+        async function loadTrialAudio(trial) {
+            try {
+                updateStatus(`Loading audio for ${trial.rhythm.name}...`, 'warning');
+                
+                const [rhythmBuffer, tonesBuffer] = await Promise.all([
+                    loadAudioBuffer(trial.rhythm.stm1),
+                    loadAudioBuffer(trial.rhythm.stm2)
+                ]);
+                
+                audioBuffers.rhythm = rhythmBuffer;
+                audioBuffers.tones = tonesBuffer;
+                
+                console.log(`Audio loaded for ${trial.rhythm.name}:`, {
+                    rhythm: audioBuffers.rhythm ? 'OK' : 'FAILED',
+                    tones: audioBuffers.tones ? 'OK' : 'FAILED'
+                });
+                
+                updateStatus(`Audio loaded for ${trial.rhythm.name}!`, 'success');
+                return true;
+                
+            } catch (error) {
+                console.error(`Audio loading failed for ${trial.rhythm.name}:`, error);
+                updateStatus(`Failed to load audio for ${trial.rhythm.name}`, 'error');
+                return false;
+            }
+        }
+        
+        async function loadAudioBuffer(url) {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Could not load ${url}`);
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            return await audioContext.decodeAudioData(arrayBuffer);
+        }
+        
+        async function playAudio() {
+            if (!audioBuffers.rhythm || !audioBuffers.tones) {
+                updateStatus('Audio not loaded', 'error');
+                return false;
+            }
+            
+            try {
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+                
+                if (audioContext.state !== 'running') {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    if (audioContext.state === 'suspended') {
+                        await audioContext.resume();
+                    }
+                }
+                
+                stopAudio();
+                
+                const now = audioContext.currentTime + 0.1;
+                const toneOffset = currentBeatOffset * currentTrial.rhythm.beat_duration;
+                
+                let startPosition;
+                if (isFirstPlay) {
+                    const randomBeat = Math.floor(Math.random() * currentTrial.rhythm.beats_per_cycle) + 1;
+                    startPosition = (randomBeat - 1) * currentTrial.rhythm.beat_duration;
+                    currentPlaybackPosition = startPosition;
+                    isFirstPlay = false;
+                } else {
+                    startPosition = currentPlaybackPosition;
+                }
+                
+                // Play rhythm track
+                audioSources.rhythm = audioContext.createBufferSource();
+                audioSources.rhythm.buffer = audioBuffers.rhythm;
+                audioSources.rhythm.connect(gainNodes.rhythm);
+                audioSources.rhythm.start(now, startPosition);
+                
+                // Play tones track with offset
+                audioSources.tones = audioContext.createBufferSource();
+                audioSources.tones.buffer = audioBuffers.tones;
+                audioSources.tones.connect(gainNodes.tones);
+                audioSources.tones.start(now, startPosition + toneOffset);
+                
+                // Apply fade-in to rhythm only
+                const firstCycleDuration = currentTrial.rhythm.beats_per_cycle * currentTrial.rhythm.beat_duration;
+                const shouldFadeIn = startPosition < firstCycleDuration;
+                
+                if (shouldFadeIn) {
+                    const remainingFadeTime = Math.max(0.1, firstCycleDuration - startPosition);
+                    const fadeEndTime = now + remainingFadeTime;
+                    
+                    gainNodes.rhythm.gain.setValueAtTime(0.001, now);
+                    gainNodes.rhythm.gain.exponentialRampToValueAtTime(0.7, fadeEndTime);
+                } else {
+                    gainNodes.rhythm.gain.setValueAtTime(0.7, now);
+                }
+                
+                gainNodes.tones.gain.setValueAtTime(0.8, now);
+                
+                isPlaying = true;
+                playbackStartTime = now;
+                
+                updateStatus('Playing... Use arrows to adjust alignment in real-time', 'success');
+                
+                const remainingDuration = audioBuffers.rhythm.duration - startPosition;
+                setTimeout(() => {
+                    if (isPlaying) {
+                        currentPlaybackPosition = 0;
+                        isFirstPlay = true;
+                        stopAudio();
+                        updateStatus('Audio finished. Click Play to listen again from the beginning.', '');
+                    }
+                }, remainingDuration * 1000);
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Audio playback error:', error);
+                updateStatus('Audio playback failed. Try refreshing the page.', 'error');
+                return false;
+            }
+        }
+        
+        function pauseAudio() {
+            if (isPlaying) {
+                const elapsedTime = audioContext.currentTime - playbackStartTime;
+                currentPlaybackPosition += elapsedTime;
+                
+                if (currentPlaybackPosition >= audioBuffers.rhythm.duration) {
+                    currentPlaybackPosition = 0;
+                }
+            }
+            
+            stopAudio();
+            updateStatus('Paused. Use arrows to adjust, then Play to resume.', '');
+        }
+        
+        function stopAudio() {
+            Object.values(audioSources).forEach(source => {
+                if (source) {
+                    try { source.stop(); } catch(e) {}
+                }
+            });
+            audioSources.rhythm = null;
+            audioSources.tones = null;
+            isPlaying = false;
+        }
+        
+        // ==========================================
+        // EXPERIMENT FLOW FUNCTIONS
+        // ==========================================
+        
+        async function startExperiment() {
+            updateStatus('Initializing audio system...', 'warning');
+            
+            const audioInit = await initializeAudio();
+            if (!audioInit) {
+                updateStatus('Audio initialization failed', 'error');
+                return;
+            }
+            
+            // Safari audio unlock
+            try {
+                const silentBuffer = audioContext.createBuffer(1, 1, audioContext.sampleRate);
+                const silentSource = audioContext.createBufferSource();
+                silentSource.buffer = silentBuffer;
+                silentSource.connect(audioContext.destination);
+                silentSource.start();
+                console.log('Safari audio unlock attempted');
+            } catch (e) {
+                console.log('Safari audio unlock failed:', e);
+            }
+            
+            // Generate experiment trials
+            experimentTrials = generateTrials();
+            console.log('Generated trials:', experimentTrials);
+            
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('experiment-content').style.display = 'block';
+            
+            showInstructions();
+        }
+        
+        function showInstructions() {
+            const content = `
+                <div class="participant-id">Participant ID: ${participantId}</div>
+                
+                <div class="instructions">
+                    <h3>Instructions</h3>
+                    <ul>
+                        <li><strong>Task:</strong> Align the tone beeps with the rhythm track</li>
+                        <li><strong>Experiment:</strong> You'll complete ${experimentTrials.length} trials with different rhythms</li>
+                        <li><strong>Controls:</strong> Use ← and → arrows to shift the tones earlier or later</li>
+                        <li><strong>Goal:</strong> Find the position where tones align best with the rhythm's first beat</li>
+                        <li><strong>Tip:</strong> You can adjust timing while audio plays for real-time feedback</li>
+                    </ul>
+                </div>
+                
+                <div class="info-box">
+                    <p><strong>Age (optional):</strong> <input type="number" id="age" placeholder="Enter your age" min="1" max="120"></p>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="startFirstTrial()">Begin Experiment</button>
+                </div>
+            `;
+            
+            document.getElementById('experiment-content').innerHTML = content;
+        }
+        
+        async function startFirstTrial() {
+            participantAge = document.getElementById('age')?.value || '';
+            currentTrialIndex = 0;
+            await startTrial();
+        }
+        
+        async function startTrial() {
+            if (currentTrialIndex >= experimentTrials.length) {
+                finishExperiment();
+                return;
+            }
+            
+            currentTrial = experimentTrials[currentTrialIndex];
+            
+            updateStatus(`Loading trial ${currentTrial.trial_number}...`, 'warning');
+            
+            // Load audio for this trial
+            const audioLoaded = await loadTrialAudio(currentTrial);
+            if (!audioLoaded) {
+                return;
+            }
+            
+            // Reset trial variables
+            initialBeatOffset = Math.floor(Math.random() * (currentTrial.rhythm.beats_per_cycle - 1)) + 1;
+            currentBeatOffset = initialBeatOffset;
+            trialStartTime = Date.now();
+            adjustmentCount = 0;
+            currentPlaybackPosition = 0;
+            isFirstPlay = true;
+            
+            // Show trial interface
+            const progressPercent = Math.round((currentTrialIndex / experimentTrials.length) * 100);
+            
+            const content = `
+                <div class="participant-id">Participant ID: ${participantId}</div>
+                
+                <div class="trial-progress">
+                    Trial ${currentTrial.trial_number} of ${experimentTrials.length}
+                </div>
+                
+                <div class="experiment-progress">
+                    <div class="progress-text">Overall Progress: ${progressPercent}%</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progressPercent}%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-panel">
+                    <div class="beat-display">
+                        <div style="color: #718096; font-size: 0.95em; margin-top: 8px;">Use the arrows below to adjust the timing of the tone/beep. You can adjust while audio is playing for immediate feedback.</div>
+                    </div>
+                    
+                    <div class="beat-controls">
+                        <button class="beat-btn" onclick="adjustBeat(1)" title="Shift tones earlier">←</button>
+                        <div style="text-align: center; color: #4a5568;">
+                            <div style="font-weight: bold; font-size: 1.1em;">Timing Control</div>
+                            <div style="font-size: 0.9em; margin-top: 5px;">← Earlier | Later →</div>
+                        </div>
+                        <button class="beat-btn" onclick="adjustBeat(-1)" title="Shift tones later">→</button>
+                    </div>
+                    
+                    <div class="wheel-container">
+                        <div class="wheel-label">Visual Indicator</div>
+                        <div class="timing-wheel" id="timing-wheel">
+                            <div class="wheel-base">
+                                ${generateWheelTicks(currentTrial.rhythm.beats_per_cycle)}
+                                <div class="wheel-pointer" id="wheel-pointer"></div>
+                                <div class="wheel-center"></div>
+                            </div>
+                        </div>
+                        <div class="wheel-labels">
+                            Shows current timing adjustment
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="playAudio()">▶ Play</button>
+                        <button class="btn" onclick="pauseAudio()">⏸ Pause</button>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-submit" onclick="submitTrial()">Submit This Trial</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('experiment-content').innerHTML = content;
+            updateStatus('Ready! Click Play and use arrows to adjust alignment in real-time.', '');
+            
+            updateWheelVisualization();
+        }
+        
+        function generateWheelTicks(beatsPerCycle) {
+            let ticksHTML = '';
+            for (let i = 0; i < beatsPerCycle; i++) {
+                const angle = (360 / beatsPerCycle) * i;
+                const isStartPosition = i === 0 ? ' start-position' : '';
+                ticksHTML += `<div class="wheel-tick${isStartPosition}" style="transform: rotate(${angle}deg);"></div>`;
+            }
+            return ticksHTML;
+        }
+        
+        function adjustBeat(direction) {
+            let newOffset = currentBeatOffset + direction;
+            
+            // Wrap around the cycle
+            if (newOffset >= currentTrial.rhythm.beats_per_cycle) {
+                newOffset = 0;
+            } else if (newOffset < 0) {
+                newOffset = currentTrial.rhythm.beats_per_cycle - 1;
+            }
+            
+            currentBeatOffset = newOffset;
+            adjustmentCount++;
+            
+            updateWheelVisualization();
+            
+            if (isPlaying) {
+                const elapsedTime = audioContext.currentTime - playbackStartTime;
+                currentPlaybackPosition += elapsedTime;
+                playAudio();
+                updateStatus('Alignment adjusted - audio continues with new timing', 'success');
+            } else {
+                updateStatus('Adjustment made. Click Play to hear the change.', '');
+            }
+        }
+        
+        function updateWheelVisualization() {
+            const pointer = document.getElementById('wheel-pointer');
+            if (!pointer) return;
+            
+            // Calculate offset from initial position
+            let offsetFromInitial = currentBeatOffset - initialBeatOffset;
+            
+            // Handle wrapping (shortest path)
+            const halfCycle = currentTrial.rhythm.beats_per_cycle / 2;
+            if (offsetFromInitial > halfCycle) {
+                offsetFromInitial -= currentTrial.rhythm.beats_per_cycle;
+            } else if (offsetFromInitial < -halfCycle) {
+                offsetFromInitial += currentTrial.rhythm.beats_per_cycle;
+            }
+            
+            // Calculate angle - each position is 360/beats_per_cycle degrees apart
+            const anglePerBeat = 360 / currentTrial.rhythm.beats_per_cycle;
+            const angle = -offsetFromInitial * anglePerBeat; // Negative for correct direction
+            
+            pointer.style.transform = `rotate(${angle}deg)`;
+        }
+        
+        function submitTrial() {
+            pauseAudio();
+            
+            const trialDuration = Date.now() - trialStartTime;
+            
+            // Calculate error (assuming beat 0 is correct alignment)
+            const correctBeat = 0;
+            const errorBeats = currentBeatOffset - correctBeat;
+            const absoluteError = Math.abs(errorBeats);
+            
+            const trialData = {
+                participant_id: participantId,
+                trial_number: currentTrial.trial_number,
+                trial_id: currentTrial.trial_id,
+                rhythm_name: currentTrial.rhythm.name,
+                repetition: currentTrial.repetition,
+                timestamp: new Date().toISOString(),
+                age: participantAge,
+                
+                // Trial configuration
+                rhythm_file: currentTrial.rhythm.stm1,
+                tones_file: currentTrial.rhythm.stm2,
+                beat_duration_ms: currentTrial.rhythm.beat_duration * 1000,
+                beats_per_cycle: currentTrial.rhythm.beats_per_cycle,
+                total_cycles: currentTrial.rhythm.total_cycles,
+                
+                // Participant response
+                initial_beat_offset: initialBeatOffset,
+                final_beat_offset: currentBeatOffset,
+                correct_beat_offset: correctBeat,
+                
+                // Performance metrics
+                error_beats: errorBeats,
+                absolute_error_beats: absoluteError,
+                total_adjustments: adjustmentCount,
+                trial_duration_ms: trialDuration,
+                trial_duration_sec: Math.round(trialDuration / 100) / 10
+            };
+            
+            allTrialData.push(trialData);
+            
+            updateStatus('Trial completed!', 'success');
+            
+            // Move to next trial
+            currentTrialIndex++;
+            
+            if (currentTrialIndex >= experimentTrials.length) {
+                // All trials completed
+                setTimeout(() => finishExperiment(), 1500);
+            } else {
+                // Show next trial button
+                setTimeout(() => showNextTrialPrompt(), 1500);
+            }
+        }
+        
+        function showNextTrialPrompt() {
+            const remaining = experimentTrials.length - currentTrialIndex;
+            const lastTrial = allTrialData[allTrialData.length - 1];
+            const alignedBeat = lastTrial.final_beat_offset + 1; // Convert to 1-based
+            
+            // Generate feedback message
+            let feedbackMessage = '';
+            let feedbackColor = '';
+            
+            if (alignedBeat === 1) {
+                feedbackMessage = "You aligned the cycle to the first beat. Great!";
+                feedbackColor = "#38a169"; // Green
+            } else {
+                feedbackMessage = `You aligned the cycle to the ${getOrdinal(alignedBeat)} beat. That is ok, but you are supposed to align it to the 1st.`;
+                feedbackColor = "#d69e2e"; // Orange
+            }
+            
+            const content = `
+                <div class="participant-id">Participant ID: ${participantId}</div>
+                
+                <div class="info-box">
+                    <p style="color: ${feedbackColor}; font-weight: bold; font-size: 1.2em; text-align: center; margin-bottom: 20px;">${feedbackMessage}</p>
+                    
+                    <div style="text-align: center; color: #4a5568; margin-top: 25px;">
+                        <p>${remaining} more trial${remaining !== 1 ? 's' : ''} to go.</p>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-next" onclick="startTrial()">Continue to Next Trial</button>
+                </div>
+            `;
+            
+            document.getElementById('experiment-content').innerHTML = content;
+            updateStatus('Ready for next trial when you are.', '');
+        }
+        
+        function getOrdinal(num) {
+            const suffix = ["th", "st", "nd", "rd"];
+            const v = num % 100;
+            return num + (suffix[(v - 20) % 10] || suffix[v] || suffix[0]);
+        }
+        
+        async function finishExperiment() {
+            const content = `
+                <div class="participant-id">Participant ID: ${participantId}</div>
+                
+                <div class="trial-progress">
+                    All ${experimentTrials.length} trials completed!
+                </div>
+                
+                <div class="info-box">
+                    <h3 style="color: #2d3748; margin-bottom: 15px;">Experiment Complete!</h3>
+                    <p>Submitting your data...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress"></div>
+                    </div>
+                </div>
+                
+                <div id="submission-status" class="status warning">
+                    Submitting data...
+                </div>
+            `;
+            
+            document.getElementById('experiment-content').innerHTML = content;
+            
+            // Animate progress bar
+            setTimeout(() => {
+                document.getElementById('progress').style.width = '100%';
+            }, 500);
+            
+            try {
+                const csvData = convertToCSV(allTrialData);
+                await submitToGoogleForms(csvData);
+                
+                showFinalResults();
+                
+            } catch (error) {
+                console.error('Submission failed:', error);
+                
+                document.getElementById('submission-status').innerHTML = 
+                    '<span class="error">Submission failed. Downloading backup data...</span>';
+                
+                downloadBackup(convertToCSV(allTrialData));
+                showFinalResults();
+            }
+        }
+        
+        function showFinalResults() {
+            // Calculate scores
+            const totalTrials = allTrialData.length;
+            const correctTrials = allTrialData.filter(trial => trial.final_beat_offset === 0).length;
+            
+            const content = `
+                <div class="participant-id">Participant ID: ${participantId}</div>
+                
+                <div class="status success">
+                    All data submitted successfully!
+                </div>
+                
+                <div class="info-box">
+                    <h3 style="color: #2d3748; margin-bottom: 20px; text-align: center;">Your Overall Performance</h3>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <div style="font-size: 3em; font-weight: bold; color: #667eea; margin-bottom: 15px;">
+                            ${correctTrials}/${totalTrials}
+                        </div>
+                        <div style="font-size: 1.3em; color: #4a5568; margin-bottom: 10px;">
+                            Cycles aligned to the first beat
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(102, 126, 234, 0.05); padding: 25px; border-radius: 10px; border-left: 4px solid #667eea; margin: 30px 0;">
+                        <h4 style="color: #2d3748; margin-bottom: 15px;">Understanding Your Results</h4>
+                        <p style="color: #4a5568; line-height: 1.6; margin-bottom: 15px;">
+                            These rhythms are deeply rooted in specific cultural contexts and require specialized learning to recognize accurately. 
+                            Performance depends greatly on your cultural background and musical training.
+                        </p>
+                        <p style="color: #4a5568; line-height: 1.6;">
+                            Anyone who is not trained in recognizing these rhythms will focus on different features than those who are familiar with them. 
+                            This difference in perception is completely normal and reflects the cultural specificity of rhythmic patterns.
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 25px; padding-top: 20px; border-top: 2px solid #e2e8f0; color: #4a5568; text-align: center;">
+                        <p>Thank you for participating! Your data helps us understand how rhythm perception varies across different cultural and musical backgrounds.</p>
+                        <br>
+                        <p style="font-size: 0.9em; color: #718096;">You may now close this window.</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('experiment-content').innerHTML = content;
+        }
+        
+        // ==========================================
+        // DATA SUBMISSION
+        // ==========================================
+        
+        async function submitToGoogleForms(csvData) {
+            const formData = new FormData();
+            formData.append(CONFIG.GOOGLE_FORMS.fields.participant_id, participantId);
+            formData.append(CONFIG.GOOGLE_FORMS.fields.trial_data, csvData);
+            
+            if (participantAge && participantAge.trim() !== '') {
+                formData.append(CONFIG.GOOGLE_FORMS.fields.age, participantAge);
+            }
+            
+            await fetch(CONFIG.GOOGLE_FORMS.form_url, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            });
+        }
+        
+        function convertToCSV(data) {
+            if (data.length === 0) return '';
+            
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(row => 
+                Object.values(row).map(value => 
+                    typeof value === 'string' ? `"${value}"` : value
+                ).join(',')
+            );
+            
+            return headers + '\n' + rows.join('\n');
+        }
+        
+        function downloadBackup(csvData) {
+            const blob = new Blob([csvData], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${participantId}_rhythm_alignment_full.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // ==========================================
+        // UTILITY FUNCTIONS
+        // ==========================================
+        
+        function updateStatus(message, type = '') {
+            const statusEl = document.getElementById('status-text') || document.getElementById('submission-status');
+            if (statusEl) {
+                statusEl.textContent = message;
+                const statusContainer = statusEl.closest('.status');
+                if (statusContainer) {
+                    statusContainer.className = `status ${type}`;
+                }
+            }
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            if (document.querySelector('.control-panel')) {
+                if (event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    adjustBeat(1);
+                } else if (event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    adjustBeat(-1);
+                } else if (event.key === ' ') {
+                    event.preventDefault();
+                    if (isPlaying) {
+                        pauseAudio();
+                    } else {
+                        playAudio();
+                    }
+                }
+            }
+        });
+        
+        // Make functions global for onclick handlers
+        window.startExperiment = startExperiment;
+        window.startFirstTrial = startFirstTrial;
+        window.startTrial = startTrial;
+        window.playAudio = playAudio;
+        window.pauseAudio = pauseAudio;
+        window.adjustBeat = adjustBeat;
+        window.submitTrial = submitTrial;
+        
+    </script>
+</body>
+</html>
