@@ -702,6 +702,7 @@
         let adjustmentCount = 0;
         let allTrialData = [];
         let cumulativeWheelAngle = 0; // Track cumulative wheel rotation
+        let hasPlayedCurrentTrial = false; // Track if play button was pressed in current trial
         
         // NEW: Track the random start beat
         let randomStartBeat = 1;
@@ -1310,32 +1311,82 @@
             surveyData.ethnicity = document.getElementById('ethnicity')?.value || '';
             surveyData.age = document.getElementById('age')?.value || '';
             
+            // Check for Indian music familiarity selection
+            const indianFamiliarityRadio = document.querySelector('input[name="indianFamiliarity"]:checked');
+            if (!indianFamiliarityRadio) {
+                updateStatus('Please indicate whether you are familiar with Indian music', 'warning');
+                return;
+            }
+            
             if (surveyData.indianMusicFamiliarity === 'yes') {
                 const hindustaniRadio = document.querySelector('input[name="hindustaniTraining"]:checked');
                 surveyData.hindustaniTraining = hindustaniRadio?.value || '';
+                
+                if (!surveyData.hindustaniTraining) {
+                    updateStatus('Please indicate your Hindustani Classical Music training level', 'warning');
+                    return;
+                }
+                
                 surveyData.hindustaniYears = document.getElementById('hindustani-years-input')?.value || '';
+                
+                // If they said "Yes" or "A little" to Hindustani training, years are required
+                if ((surveyData.hindustaniTraining === 'yes' || surveyData.hindustaniTraining === 'little') && !surveyData.hindustaniYears) {
+                    updateStatus('Please enter the number of years of Hindustani music training', 'warning');
+                    return;
+                }
                 
                 // If they said "No" to Hindustani training, collect general music info
                 if (surveyData.hindustaniTraining === 'no') {
                     surveyData.musicianType = document.getElementById('musician-type')?.value || '';
                     
+                    if (!surveyData.musicianType) {
+                        updateStatus('Please select which title best describes you', 'warning');
+                        return;
+                    }
+                    
                     const needsTrainingQuestions = ['amateur', 'serious-amateur', 'semiprofessional', 'professional'].includes(surveyData.musicianType);
                     if (needsTrainingQuestions) {
                         surveyData.musicalTrainingYears = document.getElementById('training-years-input')?.value || '';
                         surveyData.musicalTrainingType = document.getElementById('musical-training-type')?.value || '';
+                        
+                        if (!surveyData.musicalTrainingYears) {
+                            updateStatus('Please enter your years of musical training', 'warning');
+                            return;
+                        }
+                        
+                        if (!surveyData.musicalTrainingType) {
+                            updateStatus('Please specify your type of musical training', 'warning');
+                            return;
+                        }
                     }
                 }
             } else {
                 // They said "No" to Indian music familiarity
                 surveyData.musicianType = document.getElementById('musician-type-main')?.value || '';
                 
+                if (!surveyData.musicianType) {
+                    updateStatus('Please select which title best describes you', 'warning');
+                    return;
+                }
+                
                 const needsTrainingQuestions = ['amateur', 'serious-amateur', 'semiprofessional', 'professional'].includes(surveyData.musicianType);
                 if (needsTrainingQuestions) {
                     surveyData.musicalTrainingYears = document.getElementById('training-years-input-main')?.value || '';
                     surveyData.musicalTrainingType = document.getElementById('musical-training-type-main')?.value || '';
+                    
+                    if (!surveyData.musicalTrainingYears) {
+                        updateStatus('Please enter your years of musical training', 'warning');
+                        return;
+                    }
+                    
+                    if (!surveyData.musicalTrainingType) {
+                        updateStatus('Please specify your type of musical training', 'warning');
+                        return;
+                    }
                 }
             }
             
+            // All demographics are compulsory
             if (!surveyData.age) {
                 updateStatus('Please enter your age to continue', 'warning');
                 return;
@@ -2047,12 +2098,24 @@
         }
         
         function finishPractice1() {
+            // Check if participant has aligned to beat 1 (currentBeatOffset === 0)
+            if (currentBeatOffset !== 0) {
+                updateStatus('Please align the rhythm to the 1st Beat', 'warning');
+                return;
+            }
+            
             stopAudio();
             practiceStage = 1;
             showPracticeStage();
         }
         
         function finishPractice2() {
+            // Check if participant has aligned to beat 1 (currentBeatOffset === 0)
+            if (currentBeatOffset !== 0) {
+                updateStatus('Please align the rhythm to the 1st Beat', 'warning');
+                return;
+            }
+            
             stopAudio();
             practiceStage = 2; // Mark practice as complete
             showPracticeStage();
@@ -2117,6 +2180,7 @@
             adjustmentCount = 0;
             currentPlaybackPosition = 0;
             isFirstPlay = true;
+            hasPlayedCurrentTrial = false; // Reset play tracking for new trial
             
             // Reset random start tracking for this trial
             randomStartBeat = 1;
@@ -2200,6 +2264,9 @@
                 updateStatus('Audio not loaded', 'error');
                 return false;
             }
+            
+            // Set flag that play button has been pressed in this trial
+            hasPlayedCurrentTrial = true;
             
             try {
                 if (audioContext.state === 'suspended') {
@@ -2360,6 +2427,12 @@
         }
         
         function submitTrial() {
+            // Check if participant has pressed play at least once
+            if (!hasPlayedCurrentTrial) {
+                updateStatus('Please complete the trial, press play to begin and shift the sound left and right using arrows', 'warning');
+                return;
+            }
+            
             pauseAudio();
             
             const trialDuration = Date.now() - trialStartTime;
@@ -2825,16 +2898,66 @@
         
         // Utility functions
         function updateStatus(message, type = '') {
-            const statusEl = document.getElementById('status-text') || document.getElementById('submission-status');
-            if (statusEl) {
-                statusEl.textContent = message;
-                const statusContainer = statusEl.closest('.status');
-                if (statusContainer) {
-                    statusContainer.className = `status ${type}`;
+            // Create or update error message display
+            let statusEl = document.getElementById('error-message-display');
+            
+            if (!statusEl) {
+                // Create error message element if it doesn't exist
+                statusEl = document.createElement('div');
+                statusEl.id = 'error-message-display';
+                statusEl.style.margin = '15px 0';
+                statusEl.style.padding = '15px';
+                statusEl.style.borderRadius = '8px';
+                statusEl.style.fontWeight = '500';
+                statusEl.style.textAlign = 'center';
+                
+                // Find a good place to insert it - look for button groups or form areas
+                const buttonGroup = document.querySelector('.button-group');
+                const controlPanel = document.querySelector('.control-panel');
+                const infoBox = document.querySelector('.info-box');
+                
+                if (buttonGroup && buttonGroup.parentNode) {
+                    buttonGroup.parentNode.insertBefore(statusEl, buttonGroup);
+                } else if (controlPanel) {
+                    controlPanel.insertBefore(statusEl, controlPanel.firstChild);
+                } else if (infoBox && infoBox.parentNode) {
+                    infoBox.parentNode.insertBefore(statusEl, infoBox.nextSibling);
+                } else {
+                    // Fallback - add to experiment content
+                    const content = document.getElementById('experiment-content');
+                    if (content && content.firstChild) {
+                        content.insertBefore(statusEl, content.firstChild.nextSibling);
+                    }
                 }
             }
-            if (!statusEl) {
-                console.log(`Status: ${message} (${type})`);
+            
+            if (message) {
+                statusEl.textContent = message;
+                statusEl.style.display = 'block';
+                
+                // Set colors based on type
+                if (type === 'warning') {
+                    statusEl.style.background = 'rgba(237, 137, 54, 0.1)';
+                    statusEl.style.border = '2px solid #ed8936';
+                    statusEl.style.color = '#c05621';
+                } else if (type === 'error') {
+                    statusEl.style.background = 'rgba(229, 62, 62, 0.1)';
+                    statusEl.style.border = '2px solid #e53e3e';
+                    statusEl.style.color = '#c53030';
+                } else if (type === 'success') {
+                    statusEl.style.background = 'rgba(72, 187, 120, 0.1)';
+                    statusEl.style.border = '2px solid #48bb78';
+                    statusEl.style.color = '#2f855a';
+                } else {
+                    statusEl.style.background = 'rgba(66, 153, 225, 0.1)';
+                    statusEl.style.border = '2px solid #4299e1';
+                    statusEl.style.color = '#2c5282';
+                }
+                
+                // Scroll to error message to make sure it's visible
+                statusEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                statusEl.style.display = 'none';
             }
         }
         
@@ -2847,7 +2970,7 @@
             console.log('Initializing audio...');
             const audioInit = await initializeAudio();
             if (!audioInit) {
-                updateStatus('❌ Audio initialization failed - please refresh and try again', 'error');
+                updateStatus('⚠ Audio initialization failed - please refresh and try again', 'error');
                 return;
             }
             
