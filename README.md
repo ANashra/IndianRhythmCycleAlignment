@@ -2,7 +2,7 @@
 This is the task designed to capture alignment behavior to the to the first beat of a rhythm cycle in North Indian Classical Music (NICM): 
 https://anashra.github.io/IndianRhythmCycleAlignment/
 
-**Audio Stimuli**: Audio recordings of the four rhythm cycles used in the task are provided in the `Audio/` folder.
+**Audio Stimuli**: Audio recordings of the four rhythm cycles used in the task are provided in the `audio/` folder.
 
 **Dataset Description**: The file `RAT_cross_culture.csv` contains the first batch of preprocessed behavioral data collected from four participant groups:
 - Western musicians  
