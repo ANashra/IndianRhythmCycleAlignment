@@ -1,4 +1,4 @@
-# Indian Rhythm Cycle Alignment Task (RAT)
+# Rhythm Cycle Alignment Task (RAT)
 This is the task designed to capture alignment behavior to the to the first beat of a rhythm cycle in North Indian Classical Music (NICM): 
 https://anashra.github.io/IndianRhythmCycleAlignment/
 
