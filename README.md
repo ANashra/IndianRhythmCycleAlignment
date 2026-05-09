@@ -10,7 +10,7 @@ https://anashra.github.io/IndianRhythmCycleAlignment/
 - NICM-trained musicians  
 - Indian non-musicians
 
-Preprocessed data for each trial has been provided in `Trial_RAT_cross_culture.csv`
+Preprocessed data for each trial has been provided in `trail_level_rhythm_data.csv`
 
 All preprocessing was performed by the author.
 
