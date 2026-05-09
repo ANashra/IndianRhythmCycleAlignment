@@ -4,7 +4,7 @@ https://anashra.github.io/IndianRhythmCycleAlignment/
 
 **Audio Stimuli**: Audio recordings of the four rhythm cycles used in the task are provided in the `audio/` folder.
 
-**Dataset Description**: The file `RAT_cross_culture.csv` contains the first batch of raw behavioral data collected from four participant groups:
+**Dataset Description**: The file `processed_rhythm_data.csv` contains the first batch of raw behavioral data collected from four participant groups:
 - Western musicians  
 - Western non-musicians  
 - NICM-trained musicians  
