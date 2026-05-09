@@ -2,7 +2,7 @@
 This is the task designed to capture alignment behaviour to the first beat of a rhythm cycle in North Indian Classical Music (NICM): 
 https://anashra.github.io/IndianRhythmCycleAlignment/
 
-Open the link to see the experiment interface and the task that participants performed. The code for it is in `index.html` 
+Open the link to see the experiment interface and the task that participants performed. The task can be edited as needed. The code for it is in `index.html` . 
 
 **Audio Stimuli**: Audio recordings of the four rhythm cycles used in the task are provided in the `audio/` folder.
 
